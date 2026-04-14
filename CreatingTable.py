@@ -28,12 +28,14 @@ spec_Cat='planCategories.*.type'
 list_cat=glom(loaded_json,spec_Cat)
 # print(list_cat)
 all_price_data={"price":unflat_rates,"category":list_cat}
+# print(all_price_data)
 df1=pd.DataFrame(data=all_price_data)
 # print('df1\n',df1)
 df_exploded1=df1.explode("price")
 df_prices=df_exploded1.explode("price",ignore_index=True)
 df_prices.insert(0,"id",np.arange(0,len(df_prices)).tolist())
-#-> print(df_prices)
+# print(df_prices)
+ipcdict=df_prices.to_dict(orient='index')
 # print('before')
 # print(np.arange(0,191))
 # print('after')
@@ -51,7 +53,7 @@ one_list={}
 count=0
 spec_benefits='planCategories.*.subCategories.*.plans.*.misc.subscriptions.*.title'
 ottlist=glom(loaded_json,spec_benefits)
-print("ottlist:\n",ottlist)
+# print("ottlist:\n",ottlist)
 # flatott=Flatten(ottlist)
 # for row in ottlist :
 #     for item in row:
@@ -89,6 +91,7 @@ iterateing=0
 one_pack=[]
 final_dict={}
 for i in one_list:
+    one_pack.append(ipcdict[i])
     for j in range(len(one_list[i])):
         proper_one_list={}
         proper_one_list[one_list[i][j]['header']]=one_list[i][j]['value']
@@ -116,10 +119,10 @@ df2=pd.DataFrame(data=all_Benefits_data)
 df2=df2.explode(["benefitname","benefitvalue"],ignore_index=True)
 dftest=df2.explode(["benefitvalue"],ignore_index=True)
 # print(dftest.head(30))
-print(df2)
-print("\n",flatott,"\n",len(flatott))
+# print(df2)
+# print("\n",flatott,"\n",len(flatott))
 dfott=pd.DataFrame({"sub_id":np.arange(0,len(flatott)).tolist(), "subval":flatott})
-print(dfott)
+# print(dfott)
 # dfott.insert(0,"subscription_id",np.arange(0,len(dfott)).tolist())
 # print(dfott)
 # print(df2.loc[df2['Plan Id']==183])
@@ -132,5 +135,5 @@ df2.insert(0,"dfid",np.arange(0,len(df2)))
 # df2dict=df2.to_dict(orient="records")
 # # print(df2dict)
 
-# uniqueottlist=pd.Series(flatott).unique()
-# # print("uniqueottlist\n",list(uniqueottlist))
+uniqueottlist=pd.Series(flatten(flatott)).unique()
+# print("uniqueottlist\n",list(uniqueottlist),len(list(uniqueottlist)))
