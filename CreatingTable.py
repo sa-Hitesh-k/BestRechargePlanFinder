@@ -2,8 +2,9 @@ from FetchingResponse import loaded_json
 import pandas as pd 
 import numpy as np
 from glom import glom, Flatten
+# imported all the required libraries
 
-
+# a flattening function for nested list
 def flatten(lst):
     result = []
     for item in lst:
@@ -12,18 +13,22 @@ def flatten(lst):
         else:
             result.append(item)
     return result
-
+# a flattening function for nested dictionary
+def flattendict(d):
+    result={}
+    for key, value in d.items():
+        pack={}
+        for subval in value:
+            for k,v in subval.items():
+                pack[k]=v
+        result[key]=pack
+    return result
+# using glom to extract amount of each plan
 spec_rate='planCategories.*.subCategories.*.plans.*.amount'
 unflat_rates=glom(loaded_json,spec_rate)
-# print(unflat_rates)
-# print(len(unflat_rates))
+# flattening rates :
 flattened_rates=[item for row in unflat_rates for item in row]
-# print(flattened_rates)
-# print(len(flattened_rates))
-
-# all_price_data={"price":flattened_rates}
-# df1=pd.DataFrame(data=all_price_data)
-# print(df1)
+# extracting categories of plans
 spec_Cat='planCategories.*.type'
 list_cat=glom(loaded_json,spec_Cat)
 # print(list_cat)
@@ -89,7 +94,7 @@ for i in range(0,len(loaded_json['planCategories'])):
 # print("one list=\n",one_list,"\n\n")
 iterateing=0
 one_pack=[]
-final_dict={}
+final_dict_nested={}
 for i in one_list:
     one_pack.append(ipcdict[i])
     for j in range(len(one_list[i])):
@@ -97,17 +102,19 @@ for i in one_list:
         proper_one_list[one_list[i][j]['header']]=one_list[i][j]['value']
         one_pack.append(proper_one_list)
     #Here we get a dictionary containing lists(packs)
-    final_dict[iterateing]=one_pack
+    final_dict_nested[iterateing]=one_pack
     one_pack=[]
     iterateing+=1
-# print("final dict=",final_dict)
-# df_finaldict=pd.DataFrame(final_dict)
+# print("final dict=",final_dict_nested)
+final_dict=flattendict(final_dict_nested)
+print(final_dict)
+# df_finaldict=pd.DataFrame(final_dict_nested)
 # print(df_finaldict)
 Benefit_Name=[]
 Benefit_Value=[]
-for i in final_dict:
+for i in final_dict_nested:
     mergeddict_i={}
-    for j in final_dict[i]:
+    for j in final_dict_nested[i]:
         mergeddict_i=mergeddict_i | j
 
     Benefit_Name.append(list(mergeddict_i.keys()))

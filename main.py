@@ -36,14 +36,14 @@ def get_session():
     with Session(engine) as session:
         yield session
 
-def flatten(lst):
-    resultids = []
-    for item in lst:
-        if isinstance(item, list):
-            resultids.extend(flatten(item))
-        else:
-            resultids.append(item)
-    return resultids
+# def flatten(lst):
+#     resultids = []
+#     for item in lst:
+#         if isinstance(item, list):
+#             resultids.extend(flatten(item))
+#         else:
+#             resultids.append(item)
+#     return resultids
 
 @app.get("/jioplansprices/",summary="Find prices",description="Get a list of Jio data plans prices")
 def get_jio_plans_prices(session: Session = Depends(get_session)):
