@@ -4,7 +4,7 @@ from typing import Optional, Any, List
 from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import ARRAY
 import json
-from CreatingTable import df2, df_prices, dfott
+from CreatingTable import df_benefits, df_prices, dfott
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -41,7 +41,7 @@ with engine.begin() as conn:
 # Create the table in the database (if it doesn't exist)
 SQLModel.metadata.create_all(engine)
 
-# df2['benefitvalue'] = df2['benefitvalue'].apply(json.dumps)
+# df_benefits['benefitvalue'] = df_benefits['benefitvalue'].apply(json.dumps)
 # 3. Create a sample pandas DataFrame
 try:
     df_prices.to_sql('jioplansprices', con=engine, if_exists='append', index=False)
@@ -49,7 +49,7 @@ try:
 except ValueError as e:
     print(f"Error uploading DataFrame: {e}")
 try:
-    df2.to_sql('jioplansbenefits', con=engine, if_exists='append', index=False)
+    df_benefits.to_sql('jioplansbenefits', con=engine, if_exists='append', index=False)
     print("DataFrame jio_data_plans(details) successfully uploaded to the database.")
 except ValueError as e:
     print(f"Error uploading DataFrame: {e}")

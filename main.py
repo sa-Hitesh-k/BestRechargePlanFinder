@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel, Field, Session, create_engine, select, Column, col, Relationship
 from typing import Optional, Any, Annotated
 from sqlalchemy.orm import selectinload
-# from CreatingTable import final_dict
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -77,8 +76,8 @@ def get_plans_with_subscriptions(q: Annotated[list[str] , Query()]=[], session: 
     # resultfinal={}
     res={}
     for query in q:
-        selectids=(select(Jioplansprices).join(jioplansbenefits).where(col(jioplansbenefits.benefitvalue).ilike(f'%{query}%')).options(selectinload(Jioplansprices.plan)))
-        plans=session.exec(selectids).all()
+        select_plans=(select(Jioplansprices).join(jioplansbenefits).where(col(jioplansbenefits.benefitvalue).ilike(f'%{query}%')).options(selectinload(Jioplansprices.plan)).distinct(Jioplansprices.uid))
+        plans=session.exec(select_plans).all()
         res[query] = [
             {
                 "details": [
