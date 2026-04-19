@@ -1,10 +1,19 @@
-# Python-generated files
+# --- Secrets & Private Config (CRITICAL) ---
+.env
+.env.*
+jio_cookies.json
+RawData.json
+
+# --- Python & Virtual Environments ---
 __pycache__/
 *.py[oc]
+.venv/
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
 
-# Virtual environments
-.venv
+# --- IDE & OS Files ---
+.vscode/
+.idea/
+.DS_Store
