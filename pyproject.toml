@@ -13,6 +13,5 @@ dependencies = [
     "selenium>=4.36.0",
     "sqlmodel>=0.0.34",
     "streamlit>=1.50.0",
-    "typing>=3.10.0.0",
     "uvicorn>=0.39.0",
 ]

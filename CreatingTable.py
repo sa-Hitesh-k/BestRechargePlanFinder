@@ -141,5 +141,3 @@ uniqueottlist=pd.Series(flatten(flatott)).unique()
 # getting a dataframe for otts
 dfott=pd.DataFrame({"sub_id":np.arange(0,len(flatott)).tolist(), "subval":flatott})
 # print(dfott)
-dfott.insert(0,"subscription_id",np.arange(0,len(dfott)).tolist())
-# print(dfott)
