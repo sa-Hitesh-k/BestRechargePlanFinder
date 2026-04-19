@@ -60,7 +60,7 @@ iduidpc_dict=df_prices.to_dict(orient='index')
 spec_benefits='planCategories.*.subCategories.*.plans.*.misc.details'
 # we get dictionaries nested in list 4 times
 dict_benefits=glom(loaded_json,spec_benefits)
-print('dict_benefits=','\n',dict_benefits,"\n",len(dict_benefits))
+# print('dict_benefits=','\n',dict_benefits,"\n",len(dict_benefits))
 
 # dictionary containing all the benefits of each pack ,an iterator for getting all the benefits
 one_list={}
@@ -87,7 +87,7 @@ for i in range(0,len(loaded_json['planCategories'])):
             one_list[count]=dict_benefits[i][j][k]
             count+=1
 
-print("one list=\n",one_list,"\n\n")
+# print("one list=\n",one_list,"\n\n")
 # putting all the benefits and uid, id ,price and category of each price in a list(one_pack)
 iterateing=0
 one_pack=[]
@@ -106,7 +106,7 @@ for i in one_list:
 
 # uncomment print statement to see the dictionary. This dictionary contains the id, uid, price and category in one dict of pack lisit and benefits in other
 # Example: {0: [{'id': 0, 'uid': '1018982', 'price': '349', 'category': 'Popular Plans'}, {'Pack validity': '28 Days'}, {'Total data': '56 GB'}, {'Data at high speed*': '2 GB/Day'}, {'Voice': 'Unlimited'}, {'SMS': '100 SMS/Day'}, {'Subscriptions': ['JioTV', 'JioAICloud']}]
-print("final dict nested=\n",final_dict_nested)
+# print("final dict nested=\n",final_dict_nested)
 
 #getting the list of Benefit Name and Benefit Value from final_dict_nested
 Benefit_Name=[]
