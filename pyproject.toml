@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
+    "dotenv>=0.9.9",
     "fastapi>=0.128.8",
     "glom>=25.12.0",
     "httpx>=0.28.1",
@@ -13,5 +14,6 @@ dependencies = [
     "selenium>=4.36.0",
     "sqlmodel>=0.0.34",
     "streamlit>=1.50.0",
+    "typing>=3.10.0.0",
     "uvicorn>=0.39.0",
 ]
