@@ -1,5 +1,5 @@
 import pandas as pd
-from sqlmodel import create_engine, SQLModel, Field, Session, select, Column, String
+from sqlmodel import create_engine, SQLModel, Field, Session, select, Column, String, Relationship
 from typing import Optional, Any, List
 from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -13,16 +13,18 @@ db_url = os.getenv("DATABASE_URL")
 class Jioplansprices(SQLModel, table=True):
     __tablename__="jioplansprices"
     id :int = Field(default=None, primary_key=True)
+    uid: int
     price: int
     category: str
-
+    plan : list["Jioplansbenefits"] =Relationship(back_populates="group")
 class Jioplansbenefits(SQLModel, table=True):
     __tablename__="jioplansbenefits"
     dfid : int =Field(default=None,primary_key=True)
     id: int= Field(default=None, foreign_key="jioplansprices.id")
+    uid : int 
     benefitname:str
     benefitvalue: str
-    
+    group: Jioplansprices | None = Relationship(back_populates="plan")
 class Jioplanssubscriptions(SQLModel, table=True):
     __tablename__="jiosubs"
     sub_id : int | None = Field(default=None, primary_key=True)

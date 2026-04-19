@@ -23,29 +23,45 @@ def flattendict(d):
                 pack[k]=v
         result[key]=pack
     return result
+
 # using glom to extract amount of each plan
 spec_rate='planCategories.*.subCategories.*.plans.*.amount'
 unflat_rates=glom(loaded_json,spec_rate)
+
 # flattening rates :
 flattened_rates=[item for row in unflat_rates for item in row]
+
 # extracting categories of plans
 spec_Cat='planCategories.*.type'
 list_cat=glom(loaded_json,spec_Cat)
 # print(list_cat)
+
+#creating dictionary of price and caetgory
 all_price_data={"price":unflat_rates,"category":list_cat}
 # print(all_price_data)
-df1=pd.DataFrame(data=all_price_data)
-# print('df1\n',df1)
-df_exploded1=df1.explode("price")
-df_prices=df_exploded1.explode("price",ignore_index=True)
-df_prices.insert(0,"id",np.arange(0,len(df_prices)).tolist())
+df_prices1=pd.DataFrame(data=all_price_data)
+# print('df_prices1\n',df_prices1)
+
+#exploding two times
+df_prices2=df_prices1.explode("price")
+df_prices=df_prices2.explode("price",ignore_index=True)
+# print(df_prices)
+df_prices.insert(0,"id",np.arange(0,len(df_prices)))
+# print(df_prices)
+
+#extracting unique ids
+spec_listof_unique_ids='planCategories.*.subCategories.*.plans.*.id'
+listof_unique_ids_unflat=glom(loaded_json,spec_listof_unique_ids)
+listof_unique_ids=flatten(listof_unique_ids_unflat)
+# print(listofids,'\n',len(listofids))
+df_prices.insert(1,"uid",listof_unique_ids)
 # print(df_prices)
 ipcdict=df_prices.to_dict(orient='index')
 # print('before')
 # print(np.arange(0,191))
 # print('after')
 # print(df_prices)
-# print(df1.explode("price",ignore_index=True))
+# print(df_prices1.explode("price",ignore_index=True))
 
 # ->getting details :[ {header :" ", value;" "}]
 #getting BENEFITS 
@@ -105,9 +121,9 @@ for i in one_list:
     final_dict_nested[iterateing]=one_pack
     one_pack=[]
     iterateing+=1
-# print("final dict=",final_dict_nested)
+# print("final dict nested=",final_dict_nested)
 final_dict=flattendict(final_dict_nested)
-print(final_dict)
+# print(final_dict)
 # df_finaldict=pd.DataFrame(final_dict_nested)
 # print(df_finaldict)
 Benefit_Name=[]
@@ -120,8 +136,9 @@ for i in final_dict_nested:
     Benefit_Name.append(list(mergeddict_i.keys()))
     Benefit_Value.append(list(mergeddict_i.values()))
 
-all_Benefits_data={"id":np.arange(0,len(Benefit_Name)).tolist(), "benefitname":Benefit_Name,"benefitvalue":Benefit_Value}
+all_Benefits_data={"id":np.arange(0,len(Benefit_Name)), "benefitname":Benefit_Name,"benefitvalue":Benefit_Value}
 df2=pd.DataFrame(data=all_Benefits_data)
+df2.insert(1,"uid",listof_unique_ids)
 # print(df2)
 df2=df2.explode(["benefitname","benefitvalue"],ignore_index=True)
 dftest=df2.explode(["benefitvalue"],ignore_index=True)
