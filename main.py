@@ -71,7 +71,7 @@ def get_plans_with_benefits(session: Session = Depends(get_session)):
         })
     return resultids
 
-@app.get("/filter-plans-by-subscriptions")
+@app.get("/filter-plans-by-OTTs")
 def get_plans_with_subscriptions(q: Annotated[list[str] , Query()]=[], session: Session =Depends(get_session)):#to work on 5 april
     # resultfinal={}
     res={}

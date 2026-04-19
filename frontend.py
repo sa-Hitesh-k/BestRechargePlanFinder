@@ -1,18 +1,23 @@
+# importing all the libraries and uniqueottlist for selection
 import streamlit as st
 import requests 
 from CreatingTable import uniqueottlist
+
 selected=[]
 st.title("Filter JIO plans")
-st.header("Select the below Subscriptions and find the plans which provide them!")
-with st.container(border=True):
-    selected=st.pills('Subscriptions',uniqueottlist,selection_mode='multi')
-st.write(f'You selected {selected}')
+st.header("Select the below OTTs and find the plans which provide them!")
 
+# A container with all the otts
+with st.container(border=True):
+    selected=st.pills('OTTs',uniqueottlist,selection_mode='multi')
+st.write(f'You selected {selected}')
 
 url = "http://127.0.0.1:8000/allJioplans/"
 
-responseall = requests.get(url)
-allpacks=responseall.json()
+response_all_otts = requests.get(url)
+allpacks=response_all_otts.json()
+
+# An expanding container with all the plans available
 with st.expander("📦 View All Plans"):
 
     for index, pack in enumerate(allpacks, start=1):
@@ -46,38 +51,17 @@ with st.expander("📦 View All Plans"):
             unsafe_allow_html=True
         )
     
-
+# If a user selects OTT(s) then this code is executed and a container with packs is displayed
 if selected:
     packcard={}
     with st.container(border=True):
-        urlsubs="http://127.0.0.1:8000/filter-plans-by-subscriptions"
+        urlsubs="http://127.0.0.1:8000/filter-plans-by-OTTs"
         query_params={
             "q":selected
         }
-        responsesubs=requests.get(urlsubs,query_params)
-        # st.write(responsesubs.json())
-        ans=responsesubs.json()
+        response_otts=requests.get(urlsubs,query_params)
+        ans=response_otts.json()
 
-#         #ans: dictionary(subs. : values[])->list(packs)->dictionary(details : list(details))->(beneftiname : benefitvalue)
-        # for i in ans:
-        #     # st.write('ans=',ans[i],type(ans[i]))#list
-        #     for j in ans[i]:
-        #         for k in j:
-        #             pack=[]
-        #             # st.write('j[k]=',j[k])
-        #             for l in j[k]:
-        #                 # st.write(l)
-        #                 pack.append(l)
-        #                 pack.append("\n")
-        #         st.markdown(
-        #                 f"""
-        #                 <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
-        #                     <h4>Pack {i}</h4>
-        #                     <p>{pack}</p>
-        #                 </div>
-        #                 """,
-        #                 unsafe_allow_html=True
-        #             )
         for i in ans:
             number=0
             for j in ans[i]:
@@ -106,23 +90,3 @@ if selected:
                             """,
                             unsafe_allow_html=True
                         )
-        #             packcard[j[k]]=st.components.v2.component(
-        #                 name="packs",
-        #                 html=f"""
-        #                     <div>
-        #                     <p>
-        #                     {j[k]}
-        #                     </p>
-        #                     </div>
-        #                     """
-        #             )
-        # result=packcard.items()(key="themed_example")
-                # st.write(j)
-                # for k in ans
-                # st.write(j)
-                # for k in i[j]:
-                #     st.write(k)
-            # st.write(ans[i][0]['details'][0])
-        # spec='*.*.details.*'
-        # detlist=glom(ans,spec)
-        # st.write(detlist)
