@@ -36,7 +36,7 @@ if selected_otts:
     if res.status_code == 200:
         packcard={}
         with st.container(border=True):
-            urlsubs="http://127.0.0.1:8000/filter-plans-by-OTTs"
+            urlsubs=f"{BASE_URL}/filter-plans-by-OTTs"
             query_params={
                 "q":selected_otts
             }
