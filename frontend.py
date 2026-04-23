@@ -16,7 +16,9 @@ def fetch_all_plans():
     return response.json() if response.status_code == 200 else []
 
 # 3. UI RENDERING
-st.title("🚀 Jio Plan Finder v0")
+st.title("🚀 Recharge Plan Finder v0")
+st.header("WELCOME TO RPF")
+st.markdown("This website helps you find \nThe Recharge Plans provided by Jio based on the subscriptions selected by YOU")
 
 # Fetch the OTT list (This is now instant after the first load)
 unique_otts = fetch_ott_list()
