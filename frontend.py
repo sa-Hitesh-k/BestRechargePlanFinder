@@ -67,7 +67,9 @@ if selected_otts:
                                     border:1px solid #ddd;
                                     margin-bottom:15px;
                                 ">
-                                    <h4>{i} Pack {number}</h4>
+                                    <h4 style="
+                                    color: blue;
+                                    ">{i} Pack {number}</h4>
                                     <p style="
                                     color: blue;
                                     ">{formatted_text}</p>
@@ -108,7 +110,9 @@ with st.expander("📦 View All Available Plans"):
                     margin-bottom:15px;
                 ">
                     <h4>Pack {index}</h4>
-                    <p>{formatted_text}</p>
+                    <p style="
+                    color: blue;
+                    ">{formatted_text}</p>
                 </div>
                 """,
                 unsafe_allow_html=True
