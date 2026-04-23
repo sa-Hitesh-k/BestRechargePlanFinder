@@ -111,3 +111,8 @@ with st.expander("📦 View All Available Plans"):
                 """,
                 unsafe_allow_html=True
             )
+
+with st.container(border=True):
+    st.markdown("FUTURE SCOPE:")
+    st.markdown("We are looking to include other Telecom providers too in future")
+    st.markdown("AND Thats Why Its Version V0")
