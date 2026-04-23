@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel, Field, Session, create_engine, select, Column, col, Relationship
 from typing import Optional, Any, Annotated
 from sqlalchemy.orm import selectinload
+import json
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -38,6 +39,11 @@ class jioplansbenefits(SQLModel, table=True):
     benefitvalue: str
     group: Jioplansprices | None = Relationship(back_populates="plan")
 
+class Uniqueotts(SQLModel, table=True):
+    __tablename__="uniqueotts"
+    ottid: int =Field(default=None, primary_key=True)
+    otts: str 
+
 def get_session():
     with Session(engine) as session:
         yield session
@@ -70,6 +76,11 @@ def get_plans_with_benefits(session: Session = Depends(get_session)):
             "benefits": grouped.get(plan.id, [])
         })
     return resultids
+
+@app.get("/unique-subscriptions", summary="Get Unique OTTs", description="Returns a sorted list of all unique OTT platforms found in Jio plans")
+def get_unique_subscriptions(session: Session = Depends(get_session)):
+    statement=select(Uniqueotts.otts)
+    return session.exec(statement).all()
 
 @app.get("/filter-plans-by-OTTs")
 def get_plans_with_subscriptions(q: Annotated[list[str] , Query()]=[], session: Session =Depends(get_session)):#to work on 5 april

@@ -4,9 +4,12 @@ from typing import Optional, Any, List
 from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import ARRAY
 import json
-from CreatingTable import df_benefits, df_prices, dfott
 import os
 from dotenv import load_dotenv
+from CreatingTable import process_all_jio_data, get_ott_list
+df_prices, df_benefits, dfott = process_all_jio_data()
+uniqueott_df=get_ott_list()
+
 load_dotenv()
 db_url = os.getenv("DATABASE_URL")
 # 1. Defining SQLModel table structure
@@ -31,6 +34,11 @@ class Jioplanssubscriptions(SQLModel, table=True):
     __tablename__="jiosubs"
     sub_id : int | None = Field(default=None, primary_key=True)
     subval :str
+
+class Uniqueotts(SQLModel, table=True):
+    __tablename__="uniqueotts"
+    ottid: int =Field(default=None, primary_key=True)
+    otts: str 
 
 
 # 2. Creating the engine
@@ -58,5 +66,10 @@ except ValueError as e:
 try:
     dfott.to_sql('jiosubs', con=engine, if_exists='append', index=False)
     print("DataFrame jio_plans_subscriptions(details) successfully uploaded to the database.")
+except ValueError as e:
+    print(f"Error uploading DataFrame: {e}")
+try:
+    uniqueott_df.to_sql('uniqueotts', con=engine, if_exists='append', index=False)
+    print("DataFrame uniqueott_df successfully uploaded to the database.")
 except ValueError as e:
     print(f"Error uploading DataFrame: {e}")

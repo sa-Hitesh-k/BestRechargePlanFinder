@@ -1,40 +1,37 @@
-import json
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+import requests
 
-# 1. Setring up Chrome Options for Network Interception
-chrome_options = Options()
-chrome_options.add_argument("--headless") # Run in background
-chrome_options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+# 1. Use the EXACT URL from your working Selenium logs
+PLANS_URL = "https://www.jio.com/api/jio-mdmdata-service/mdmdata/recharge/plans"
+PAGE_URL = "https://www.jio.com/selfcare/plans/mobility/prepaid-plans-list/"
 
-driver = webdriver.Chrome(options=chrome_options)
-
-# 2. Navigating to the page
-driver.get("https://www.jio.com/selfcare/plans/mobility/prepaid-plans-list/")
-
-# 3. Capturing the Logs
-logs = driver.get_log("performance")
-
-for entry in logs:
-    log = json.loads(entry["message"])["message"]
+def fetch_plans():
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Referer": PAGE_URL,
+        "Origin": "https://www.jio.com",
+    }
     
-    # Checking whether this log is a Network Response
-    if log["method"] == "Network.responseReceived":
-        url = log["params"]["response"]["url"]
+    params = {
+        "productType": "MOBILITY",
+        "billingType": "1"  # Don't forget the billingType!
+    }
+
+    with requests.Session() as session:
+        session.headers.update(headers)
+        # Optional: Visit page to get initial session cookies
+        session.get(PAGE_URL, timeout=30)
         
-        # Looking for our URL keyword
-        if "plans?productType=MOBILITY" in url:
-            request_id = log["params"]["requestId"]
-            print(f"Found API URL: {url}")
-            
-            # 4. Extracting the Body (The actual JSON)
-            body = driver.execute_cdp_cmd("Network.getResponseBody", {"requestId": request_id})
-            print("Successfully captured plan data.")
+        response = session.get(PLANS_URL, params=params, timeout=30)
+        response.raise_for_status()
+        return response.json()
 
-# 5. Extract Cookies for your main FastAPI script
-cookies = driver.get_cookies()
-with open("jio_cookies.json", "w") as f:
-    json.dump(cookies, f)
-
-driver.quit()
+# --- THE GUARDRAIL ---
+if __name__ == "__main__":
+    try:
+        data = fetch_plans()
+        # with open("jio_cookies.json", "w") as f:
+        #     json.dump(data, f)
+        print("✅ Successfully fetched plan data.")
+    except Exception as e:
+        print(f"❌ Failed: {e}")

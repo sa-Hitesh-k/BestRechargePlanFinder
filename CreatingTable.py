@@ -1,18 +1,12 @@
-# ---> THIS FILE EXTRACTS THE:
-# 1. 'prices', 'unique id', 'price' and  'category' and puts them in a dataframe 'df_prices'
-# 2. 'benefit name' and 'benefit value' and puts them in a dataframe 'df_benefits' then
-#    inserts id(primary key) to connect to df_prices when putting in database
-#    and dfid( dataframe id ) and uid( unique id )
-# 3. unique ott list 'uuniqueottlist'
-
-from FetchingResponse import loaded_json
 import pandas as pd 
 import numpy as np
 from glom import glom
-# imported all the required libraries
+from FetchingResponse import fetch_jio_data
 
-# a flattening function for nested list
+# --- HELPER FUNCTIONS ---
+
 def flatten(lst):
+    """A flattening function for nested list."""
     result = []
     for item in lst:
         if isinstance(item, list):
@@ -21,122 +15,145 @@ def flatten(lst):
             result.append(item)
     return result
 
-# using glom to extract amount of each plan
-spec_rate='planCategories.*.subCategories.*.plans.*.amount'
-unflat_rates=glom(loaded_json,spec_rate)
+# --- CORE PROCESSING FUNCTIONS ---
 
-# flattening rates :
-flattened_rates=[item for row in unflat_rates for item in row]
+def get_price_dataframe(loaded_json):
+    """Processes rates, categories, and unique IDs into df_prices."""
+    # Extract rates
+    spec_rate = 'planCategories.*.subCategories.*.plans.*.amount'
+    unflat_rates = glom(loaded_json, spec_rate)
+    
+    # Extract categories
+    spec_Cat = 'planCategories.*.type'
+    list_cat = glom(loaded_json, spec_Cat)
+    
+    # Create and explode DataFrame
+    all_price_data = {"price": unflat_rates, "category": list_cat}
+    df_prices = pd.DataFrame(data=all_price_data)
+    df_prices = df_prices.explode("price").explode("price", ignore_index=True)
+    
+    # Insert ID and UID
+    df_prices.insert(0, "id", np.arange(0, len(df_prices)))
+    spec_listof_unique_ids = 'planCategories.*.subCategories.*.plans.*.id'
+    listof_unique_ids_unflat = glom(loaded_json, spec_listof_unique_ids)
+    listof_unique_ids = flatten(listof_unique_ids_unflat)
+    df_prices.insert(1, "uid", listof_unique_ids)
+    
+    return df_prices, listof_unique_ids
 
-# extracting categories of plans
-spec_Cat='planCategories.*.type'
-list_cat=glom(loaded_json,spec_Cat)
-# print(list_cat)
+def get_benefit_logic(loaded_json, iduidpc_dict):
+    """Handles the heavy nested iteration logic for benefits and subscriptions."""
+    spec_benefits = 'planCategories.*.subCategories.*.plans.*.misc.details'
+    dict_benefits = glom(loaded_json, spec_benefits)
+    
+    spec_otts = 'planCategories.*.subCategories.*.plans.*.misc.subscriptions.*.title'
+    ottlist = glom(loaded_json, spec_otts)
 
-# creating dictionary of price and caetgory
-all_price_data={"price":unflat_rates,"category":list_cat}
-# print(all_price_data)
-df_prices1=pd.DataFrame(data=all_price_data)
-# print('df_prices1\n',df_prices1)
+    one_list = {}
+    count = 0 
+    flatott = []
 
-# exploding two times
-df_prices2=df_prices1.explode("price")
-df_prices=df_prices2.explode("price",ignore_index=True)
-# print(df_prices)
-df_prices.insert(0,"id",np.arange(0,len(df_prices)))
-# print(df_prices)
+    # PRESERVED ITERATION LOGIC
+    for i in range(0, len(loaded_json['planCategories'])):
+        for j in range(0, len(loaded_json['planCategories'][i]['subCategories'])):
+            for k in range(0, len(loaded_json['planCategories'][i]['subCategories'][j]['plans'])):
+                if len(ottlist[i][j]) == 0:
+                    flatott.append(ottlist[i][j])
+                    dict_benefits[i][j][k].append({'header': 'Subscriptions', 'value': ottlist[i][j]})
+                else:
+                    flatott.append(ottlist[i][j][k])
+                    dict_benefits[i][j][k].append({'header': 'Subscriptions', 'value': ottlist[i][j][k]})
 
-# extracting unique ids
-spec_listof_unique_ids='planCategories.*.subCategories.*.plans.*.id'
-listof_unique_ids_unflat=glom(loaded_json,spec_listof_unique_ids)
-listof_unique_ids=flatten(listof_unique_ids_unflat)
-df_prices.insert(1,"uid",listof_unique_ids)
+                one_list[count] = dict_benefits[i][j][k]
+                count += 1
 
-# getting a dictionary of id, uid, price and category
-iduidpc_dict=df_prices.to_dict(orient='index')
+    # Formatting into final_dict_nested
+    final_dict_nested = {}
+    iterateing = 0
+    for i in one_list:
+        one_pack = [iduidpc_dict[i]]
+        for j in range(len(one_list[i])):
+            proper_one_list = {one_list[i][j]['header']: one_list[i][j]['value']}
+            one_pack.append(proper_one_list)
+        
+        final_dict_nested[iterateing] = one_pack
+        iterateing += 1
+        
+    return final_dict_nested, flatott
 
-# getting details :[ {header :" ", value;" "} ]
-# getting BENEFITS 
-spec_benefits='planCategories.*.subCategories.*.plans.*.misc.details'
-# we get dictionaries nested in list 4 times
-dict_benefits=glom(loaded_json,spec_benefits)
-# print('dict_benefits=','\n',dict_benefits,"\n",len(dict_benefits))
+def get_benefit_dataframe(final_dict_nested, listof_unique_ids):
+    """Creates the exploded df_benefits from the nested dictionary."""
+    Benefit_Name = []
+    Benefit_Value = []
+    
+    for i in final_dict_nested:
+        mergeddict_i = {}
+        for j in final_dict_nested[i]:
+            mergeddict_i = mergeddict_i | j
+        
+        Benefit_Name.append(list(mergeddict_i.keys()))
+        Benefit_Value.append(list(mergeddict_i.values()))
 
-# dictionary containing all the benefits of each pack ,an iterator for getting all the benefits
-one_list={}
-count=0 
-# extracting the subscriptions( otts )
-spec_otts='planCategories.*.subCategories.*.plans.*.misc.subscriptions.*.title'
-ottlist=glom(loaded_json,spec_otts)
+    all_Benefits_data = {
+        "id": np.arange(0, len(Benefit_Name)), 
+        "benefitname": Benefit_Name, 
+        "benefitvalue": Benefit_Value
+    }
+    
+    df_benefits = pd.DataFrame(data=all_Benefits_data)
+    df_benefits.insert(1, "uid", listof_unique_ids)
+    df_benefits = df_benefits.explode(["benefitname", "benefitvalue"], ignore_index=True)
+    df_benefits.insert(0, "dfid", np.arange(0, len(df_benefits)))
+    
+    return df_benefits
 
-# list of all otts(but repeating)
-flatott=[]
+def get_ott_list():
+    spec_otts = 'planCategories.*.subCategories.*.plans.*.misc.subscriptions.*.title'
+    loaded_json= fetch_jio_data()
+    ottlist = glom(loaded_json, spec_otts)
+    flatott = []
 
-# appending otts to dict_benefits dictionary and putting them in one_list dictionary and otts to flatott. 
-for i in range(0,len(loaded_json['planCategories'])):
-    for j in range(0,len(loaded_json['planCategories'][i]['subCategories'])):
-        for k in range(0,len(loaded_json['planCategories'][i]['subCategories'][j]['plans'])):
-            # we get a proper one list containing dictionaries numbered . It is in "header":"Benefit Name" , "value":"Benefit Value"
-            if len(ottlist[i][j])==0:
-                flatott.append(ottlist[i][j])
-                dict_benefits[i][j][k].append({'header':'Subscriptions','value':ottlist[i][j]})
-            else:
-                flatott.append(ottlist[i][j][k])
-                dict_benefits[i][j][k].append({'header':'Subscriptions','value':ottlist[i][j][k]})
+    for i in range(0, len(loaded_json['planCategories'])):
+        for j in range(0, len(loaded_json['planCategories'][i]['subCategories'])):
+            for k in range(0, len(loaded_json['planCategories'][i]['subCategories'][j]['plans'])):
+                if len(ottlist[i][j]) == 0:
+                    flatott.append(ottlist[i][j])
+                else:
+                    flatott.append(ottlist[i][j][k])
 
-            one_list[count]=dict_benefits[i][j][k]
-            count+=1
+    #list of all the otts (non repeating)
+    uniqueottseries=pd.Series(flatten(flatott)).unique().tolist()
+    ids=np.arange(0,len(uniqueottseries)).tolist()
+    datadict={'ottid':ids, 'otts':uniqueottseries}
+    uniqueott_df=pd.DataFrame(datadict)
+    return uniqueott_df
 
-# print("one list=\n",one_list,"\n\n")
-# putting all the benefits and uid, id ,price and category of each price in a list(one_pack)
-iterateing=0
-one_pack=[]
-# dictionary with id, uid, price, category and all benefits( unnested)
-final_dict_nested={}
-for i in one_list:
-    one_pack.append(iduidpc_dict[i])
-    for j in range(len(one_list[i])):
-        proper_one_list={}
-        proper_one_list[one_list[i][j]['header']]=one_list[i][j]['value']
-        one_pack.append(proper_one_list)
-    #Here we get a dictionary containing lists(packs)
-    final_dict_nested[iterateing]=one_pack
-    one_pack=[]
-    iterateing+=1
+# --- MASTER ORCHESTRATOR ---
 
-# uncomment print statement to see the dictionary. This dictionary contains the id, uid, price and category in one dict of pack lisit and benefits in other
-# Example: {0: [{'id': 0, 'uid': '1018982', 'price': '349', 'category': 'Popular Plans'}, {'Pack validity': '28 Days'}, {'Total data': '56 GB'}, {'Data at high speed*': '2 GB/Day'}, {'Voice': 'Unlimited'}, {'SMS': '100 SMS/Day'}, {'Subscriptions': ['JioTV', 'JioAICloud']}]
-# print("final dict nested=\n",final_dict_nested)
+def process_all_jio_data():
+    """Orchestrates the full data pipeline from memory."""
+    loaded_json = fetch_jio_data()
+    if not loaded_json:
+        return None, None, None
 
-#getting the list of Benefit Name and Benefit Value from final_dict_nested
-Benefit_Name=[]
-Benefit_Value=[]
-for i in final_dict_nested:
-    mergeddict_i={}
-    for j in final_dict_nested[i]:
-        mergeddict_i=mergeddict_i | j
+    # 1. Prices
+    df_prices, listof_unique_ids = get_price_dataframe(loaded_json)
+    iduidpc_dict = df_prices.to_dict(orient='index')
 
-    Benefit_Name.append(list(mergeddict_i.keys()))
-    Benefit_Value.append(list(mergeddict_i.values()))
+    # 2. Nested Benefits
+    final_dict_nested, flatott = get_benefit_logic(loaded_json, iduidpc_dict)
 
-#dictionary with Benefit Name and Benefit Value
-all_Benefits_data={"id":np.arange(0,len(Benefit_Name)), "benefitname":Benefit_Name,"benefitvalue":Benefit_Value}
+    # 3. Benefit Dataframe
+    df_benefits = get_benefit_dataframe(final_dict_nested, listof_unique_ids)
 
-#Insertign the all_Benefits_data in a dataframe
-df_benefits=pd.DataFrame(data=all_Benefits_data)
+    # 4. OTT Dataframe
+    dfott = pd.DataFrame({"sub_id": np.arange(0, len(flatott)).tolist(), "subval": flatott})
+    # uniqueottlist=pd.Series(flatten(flatott)).unique()
+    return df_prices, df_benefits, dfott
 
-# inserting the unique ID for each plan
-df_benefits.insert(1,"uid",listof_unique_ids)
-
-# exploding the dataframe 
-df_benefits=df_benefits.explode(["benefitname","benefitvalue"],ignore_index=True)
-
-#inserting a dataframe id 
-df_benefits.insert(0,"dfid",np.arange(0,len(df_benefits)))
-# print(df_benefits)
-
-#list of all the otts (non repeating)
-uniqueottlist=pd.Series(flatten(flatott)).unique()
-
-# getting a dataframe for otts
-dfott=pd.DataFrame({"sub_id":np.arange(0,len(flatott)).tolist(), "subval":flatott})
+# --- THE GUARDRAIL ---
+if __name__ == "__main__":
+    prices, benefits, otts = process_all_jio_data()
+    uniqueotts=get_ott_list()
+    if prices is not None:
+        print(f"✅ Success! Processed {len(prices)} plans and {len(benefits)} individual benefits.")
