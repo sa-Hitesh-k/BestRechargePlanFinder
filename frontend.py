@@ -2,8 +2,7 @@ import streamlit as st
 import requests
 
 # 1. SETUP & CONFIG
-BASE_URL = "http://127.0.0.1:8000"
-
+BASE_URL = "https://mobilerechargeplanfinder.onrender.com"
 # 2. CACHED DATA FETCHING (The "Speed" Secret)
 @st.cache_data(ttl=3600)  # Cache results for 1 hour
 def fetch_ott_list():

@@ -9,7 +9,7 @@ load_dotenv()
 db_url = os.getenv("DATABASE_URL")
 
 app = FastAPI()
-origins=['http://localhost:8501']
+origins=['http://localhost:8501','https://mobilerechargeplanfinder.onrender.com/']
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
