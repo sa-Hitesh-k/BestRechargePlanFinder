@@ -126,7 +126,6 @@ def get_ott_list():
     ids=np.arange(0,len(uniqueottseries)).tolist()
     datadict={'ottid':ids, 'otts':uniqueottseries}
     uniqueott_df=pd.DataFrame(datadict)
-    # print(uniqueott_df)
     return uniqueott_df
 
 # --- MASTER ORCHESTRATOR ---
@@ -149,7 +148,6 @@ def process_all_jio_data():
 
     # 4. OTT Dataframe
     dfott = pd.DataFrame({"sub_id": np.arange(0, len(flatott)).tolist(), "subval": flatott})
-    # print("dfott =\n",dfott)
     return df_prices, df_benefits, dfott
 
 # --- THE GUARDRAIL ---
