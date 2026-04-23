@@ -122,5 +122,5 @@ with st.expander("📦 View All Available Plans"):
 
 with st.container(border=True):
     st.markdown("FUTURE SCOPE:")
-    st.markdown("We are looking to include other Telecom providers too in future")
+    st.markdown("We are looking to include other Telecom providers and filters like price, validity... in future")
     st.markdown("AND Thats Why Its Version V0")
