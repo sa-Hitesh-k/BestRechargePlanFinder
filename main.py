@@ -1,9 +1,8 @@
 from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import SQLModel, Field, Session, create_engine, select, Column, col, Relationship
-from typing import Optional, Any, Annotated
+from sqlmodel import SQLModel, Field, Session, create_engine, select, col, Relationship
+from typing import  Annotated
 from sqlalchemy.orm import selectinload
-import json
 import os
 from dotenv import load_dotenv
 load_dotenv()

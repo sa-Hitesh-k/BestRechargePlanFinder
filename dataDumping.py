@@ -47,6 +47,7 @@ with engine.begin() as conn:
     conn.execute(text("DROP TABLE IF EXISTS jioplansprices CASCADE;"))
     conn.execute(text("DROP TABLE IF EXISTS jioplansbenefits CASCADE;"))
     conn.execute(text("DROP TABLE IF EXISTS jiosubs CASCADE;"))
+    conn.execute(text("DROP TABLE IF EXISTS uniqueotts CASCADE;"))
 
 # Creating the table in the database (if it doesn't exist)
 SQLModel.metadata.create_all(engine)
