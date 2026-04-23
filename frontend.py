@@ -68,7 +68,9 @@ if selected_otts:
                                     margin-bottom:15px;
                                 ">
                                     <h4>{i} Pack {number}</h4>
-                                    <p>{formatted_text}</p>
+                                    <p style="
+                                    color: blue;
+                                    ">{formatted_text}</p>
                                 </div>
                                 """,
                                 unsafe_allow_html=True
