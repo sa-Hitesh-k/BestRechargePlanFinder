@@ -109,7 +109,9 @@ with st.expander("📦 View All Available Plans"):
                     border:1px solid #ddd;
                     margin-bottom:15px;
                 ">
-                    <h4>Pack {index}</h4>
+                    <h4 style="
+                                    color: blue;
+                                    ">Pack {index}</h4>
                     <p style="
                     color: blue;
                     ">{formatted_text}</p>
