@@ -82,20 +82,20 @@ def get_unique_subscriptions(session: Session = Depends(get_session)):
     return session.exec(statement).all()
 
 @app.get("/filter-plans-by-OTTs")
-def get_plans_with_subscriptions(q: Annotated[list[str] , Query()]=[], session: Session =Depends(get_session)):#to work on 5 april
-    # resultfinal={}
+def get_plans_with_subscriptions(q: Annotated[list[str] , Query()]=[], session: Session =Depends(get_session)):
     res={}
     for query in q:
         select_plans=(select(Jioplansprices).join(jioplansbenefits).where(col(jioplansbenefits.benefitvalue).ilike(f'%{query}%')).options(selectinload(Jioplansprices.plan)).distinct(Jioplansprices.uid))
         plans=session.exec(select_plans).all()
         res[query] = [
             {
-                "details": [
-                    {
-                        benefit.benefitname : benefit.benefitvalue
-                    }
-                    for benefit in plan.plan
-                ]
+                "price": f"₹{plan.price}",
+                "category": plan.category,
+                "benefits": [
+                {benefit.benefitname: benefit.benefitvalue}
+                for benefit in plan.plan
+                if benefit.benefitname not in ('id', 'uid', 'dfid','category') # The Gatekeeper
+            ]
             }
             for plan in plans
         ]
