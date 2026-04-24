@@ -93,7 +93,7 @@ with st.expander("📦 View All Available Plans"):
 
             for item in pack["benefits"]:
                 for key, value in item.items():
-                    if key not in ["id", "price", "category"]:
+                    if key not in ["id", "price", "category", "uid"]:
                         lines.append(f"{key}: {value}")
 
             formatted_text = "<br>".join(lines)
