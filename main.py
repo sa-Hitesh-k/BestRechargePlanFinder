@@ -89,12 +89,10 @@ def get_plans_with_subscriptions(q: Annotated[list[str] , Query()]=[], session: 
         plans=session.exec(select_plans).all()
         res[query] = [
             {
-                "price": f"₹{plan.price}",
-                "category": plan.category,
-                "benefits": [
+                "details": [
                 {benefit.benefitname: benefit.benefitvalue}
                 for benefit in plan.plan
-                if benefit.benefitname not in ('id', 'uid', 'dfid','category') # The Gatekeeper
+                    if benefit.benefitname not in ('id', 'uid', 'dfid','category') # The Gatekeeper
             ]
             }
             for plan in plans
