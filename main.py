@@ -62,16 +62,15 @@ def get_plans_with_benefits(session: Session = Depends(get_session)):
 
     grouped = {}
     for benefit in benefits:
-        grouped.setdefault(benefit.id, []).append({
-            benefit.benefitname:benefit.benefitvalue
-        })
+        if benefit.benefitname not in ('id', 'uid', 'dfid','category'):
+            grouped.setdefault(benefit.id, []).append({
+                benefit.benefitname:benefit.benefitvalue
+            }
+            )
 
     resultids = []
     for plan in plans:
         resultids.append({
-            "id": plan.id,
-            "price": plan.price,
-            "category": plan.category,
             "benefits": grouped.get(plan.id, [])
         })
     return resultids
