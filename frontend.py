@@ -89,9 +89,7 @@ with st.expander("📦 View All Available Plans"):
 
             lines = []
 
-            lines.append(f"ID: {pack['id']}")
             lines.append(f"Price: ₹{pack['price']}")
-            lines.append(f"Category: {pack['category']}")
 
             for item in pack["benefits"]:
                 for key, value in item.items():
