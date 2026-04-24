@@ -47,11 +47,11 @@ def get_session():
     with Session(engine) as session:
         yield session
 
-@app.get("/jioplansprices/",summary="Find prices",description="Get a list of Jio data plans prices")
+@app.get("/jioplansprices/",summary="Find prices",description="Get a list of Jio plans prices")
 def get_jio_plans_prices(session: Session = Depends(get_session)):
     return session.exec(select(Jioplansprices)).all()
 
-@app.get("/jioplansbenefits/", summary="Find Plans", description="Get a list of available Jio data plans details")
+@app.get("/jioplansbenefits/", summary="Find Plans", description="Get a list of available Jio plans details")
 def get_jio_plans(session: Session = Depends(get_session)):
     return session.exec(select(jioplansbenefits)).all()
 
