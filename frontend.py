@@ -88,13 +88,10 @@ with st.expander("📦 View All Available Plans"):
         for index, pack in enumerate(all_packs, start=1):
 
             lines = []
-
-            lines.append(f"Price: ₹{pack['price']}")
-
-            for item in pack["benefits"]:
-                for key, value in item.items():
-                    if key not in ["id", "price", "category", "uid"]:
-                        lines.append(f"{key}: {value}")
+            
+            for benefit_dict in pack["benefits"]:
+                for key, value in benefit_dict.items():
+                    lines.append(f"{key}: {value}")
 
             formatted_text = "<br>".join(lines)
 

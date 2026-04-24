@@ -62,7 +62,7 @@ def get_plans_with_benefits(session: Session = Depends(get_session)):
 
     grouped = {}
     for benefit in benefits:
-        if benefit.benefitname not in ('id', 'uid', 'dfid','category'):
+        if benefit.benefitname not in ('id', 'uid', 'dfid','category', 'price'):
             grouped.setdefault(benefit.id, []).append({
                 benefit.benefitname:benefit.benefitvalue
             }
