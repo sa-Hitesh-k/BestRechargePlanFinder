@@ -5,6 +5,13 @@ from typing import  Annotated
 from sqlalchemy.orm import selectinload
 import os
 from dotenv import load_dotenv
+import re
+
+def extract_numeric_value(value_string: str) -> float:
+    """Extract numeric value from strings like '28 Days', '56 GB', etc."""
+    match = re.search(r'\d+\.?\d*', str(value_string))
+    return float(match.group()) if match else 0.0
+
 load_dotenv()
 db_url = os.getenv("DATABASE_URL")
 #This is rpa local branch
@@ -62,18 +69,20 @@ def get_plans_with_benefits(session: Session = Depends(get_session)):
 
     grouped = {}
     for benefit in benefits:
-        if benefit.benefitname not in ('id', 'uid', 'dfid','category', 'price'):
+        if benefit.benefitname not in ('id', 'uid', 'dfid','category'):
             grouped.setdefault(benefit.id, []).append({
                 benefit.benefitname:benefit.benefitvalue
             }
             )
 
-    resultids = []
+    resultids, i = [], 0
     for plan in plans:
         resultids.append({
-            "benefits": grouped.get(plan.id, [])
+            f"benefits pack {i}": grouped.get(plan.id, [])
         })
+        i+=1
     return resultids
+    # return grouped
 
 @app.get("/unique-subscriptions", summary="Get Unique OTTs", description="Returns a sorted list of all unique OTT platforms found in Jio plans")
 def get_unique_subscriptions(session: Session = Depends(get_session)):
@@ -98,6 +107,88 @@ def get_plans_with_subscriptions(q: Annotated[list[str] , Query()]=[], session: 
         ]
 
     return res
+
+@app.get("/filter-plans-by-prices")
+def get_plans_in_price_range(q1:int, q2:int, session: Session= Depends(get_session)):
+    
+    
+    res={}
+    select_plans=(select(Jioplansprices).join(jioplansbenefits).where(col(Jioplansprices.price).between(q1,q2)).options(selectinload(Jioplansprices.plan)).distinct(Jioplansprices.uid))
+    plans=session.exec(select_plans).all()
+    res["prices"]=[
+        {
+            "plan":[
+                {benefit.benefitname: benefit.benefitvalue}
+                for benefit in plan.plan
+                    if benefit.benefitname not in ('id', 'uid', 'dfid','category')
+            ]
+
+        }
+        for plan in plans
+    ]
+    return res
+
+@app.get("/filter-plans-by-validity")
+def get_plans_by_validity_range(min_days: int, max_days: int, session: Session = Depends(get_session)):
+    
+    res = {}
+    select_plans = (select(Jioplansprices)
+                    .join(jioplansbenefits)
+                    .where(col(jioplansbenefits.benefitname) == "Pack validity")
+                    .options(selectinload(Jioplansprices.plan))
+                    .distinct(Jioplansprices.uid))
+    
+    plans = session.exec(select_plans).all()
+    
+    filtered_plans = [
+        plan for plan in plans
+        if min_days <= extract_numeric_value([b.benefitvalue for b in plan.plan 
+                                             if b.benefitname == "Pack validity"][0]) <= max_days
+    ]
+    
+    res["validity"] = [
+        {
+            "plan": [
+                {benefit.benefitname: benefit.benefitvalue}
+                for benefit in plan.plan
+                if benefit.benefitname not in ('id', 'uid', 'dfid', 'category')
+            ]
+        }
+        for plan in filtered_plans
+    ]
+    return res
+
+
+@app.get("/filter-plans-by-data")
+def get_plans_by_data_range(min_gb: float, max_gb: float, session: Session = Depends(get_session)):
+    
+    res = {}
+    select_plans = (select(Jioplansprices)
+                    .join(jioplansbenefits)
+                    .where(col(jioplansbenefits.benefitname) == "Total data")
+                    .options(selectinload(Jioplansprices.plan))
+                    .distinct(Jioplansprices.uid))
+    
+    plans = session.exec(select_plans).all()
+    
+    filtered_plans = [
+        plan for plan in plans
+        if min_gb <= extract_numeric_value([b.benefitvalue for b in plan.plan 
+                                           if b.benefitname == "Total data"][0]) <= max_gb
+    ]
+    
+    res["data"] = [
+        {
+            "plan": [
+                {benefit.benefitname: benefit.benefitvalue}
+                for benefit in plan.plan
+                if benefit.benefitname not in ('id', 'uid', 'dfid', 'category')
+            ]
+        }
+        for plan in filtered_plans
+    ]
+    return res
+
 def main():
     print("Hello from bestrechargeplanfinder!")
 
