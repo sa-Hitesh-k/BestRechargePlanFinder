@@ -5,7 +5,7 @@ A specialized data-to-API engine built to solve "Choice Paralysis" in mobile pla
 ## 🎯 The "v0" Reality Check
 This is a Minimum Viable Product (MVP). To ensure 99.9% uptime and stateless execution on cloud environments, the following constraints are currently in place:
 * **Provider Scope:** Currently exclusively processing **Jio Plans**.
-* **Filter Depth:** Optimization is focused solely on **OTT/Subscription-based filtering**.
+* **Filter Depth:** Multi-dimensional querying logic. Filtering engine processes **OTT Subscriptions**, **Price Thresholds**, **Data Quotas**, and **Validity Periods** using set-based SQL operations for sub-second response times.
 * **Architecture:** Deprecated Selenium-based scraping in favor of a stateless, manual data-push architecture to eliminate environment-heavy dependencies.
 
 ## 🏗️ System Architecture
@@ -29,6 +29,9 @@ The system is built on a "Thin-Client" philosophy to ensure high-speed responses
 * `GET /jioplansbenefits/` - Retrieves the details of each plan.
 * `GET /unique-subscriptions` - Returns a sorted list of unique OTT benefits (Set-logic).
 * `GET /filter-plans-by-otts` - Dynamic filtering based on user-selected OTT pills.
+* `GET /filter-plans-by-prices` - Filters plans based on minimum and maximum prices.
+* `GET /filter-plans-by-validity`- Filters plans based on minimum and maximum days .
+* `GET /filter-plans-by-data` - Filters plans based on minimum and maximum amount of data.
 
 ## 🚀 Installation & Local Development
 
