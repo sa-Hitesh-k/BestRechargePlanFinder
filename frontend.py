@@ -16,11 +16,14 @@ def fetch_all_plans():
     return response.json() if response.status_code == 200 else []
 
 # 3. UI RENDERING
-st.title("🚀 Recharge SHK Plan Finder v0")
+st.title("🚀 Recharge Plan Finder")
 st.header("WELCOME TO RPF")
-st.markdown("This website helps you find \nThe Recharge Plans provided by Jio based on the subscriptions selected by YOU")
-
-# Fetch the OTT list (This is now instant after the first load)
+st.html(
+    "<p>This website helps you find The Recharge Plans provided by Jio based on the <i>Subscriptions</i> and <i>Other filters</i> selected by "
+    "<strong>YOU</strong>"
+    "</p>"
+)
+# Fetch the OTT list 
 unique_otts = fetch_ott_list()
 
 with st.container(border=True):
@@ -55,7 +58,10 @@ if selected_otts:
 
                         for item in j[k]:   # each item is dict
                             for key, value in item.items():
-                                    lines.append(f"{key}: {value}")
+                                    if key=="Subscriptions":                            
+                                        lines.append(f"{key}: <strong>{value}</strong>")
+                                    else:
+                                        lines.append(f"{key}: {value}")
 
                         formatted_text = "<br>".join(lines)
 
@@ -69,7 +75,7 @@ if selected_otts:
                                     margin-bottom:15px;
                                 ">
                                     <h4 style="
-                                    color: blue;
+                                    color: orange;
                                     ">{i} Pack {number}</h4>
                                     <p style="
                                     color: blue;
@@ -87,7 +93,7 @@ with st.expander("Filter By Price Range ?"):
         price1= st.number_input("Enter minimum price: ", step=1)
         price2= st.number_input("Enter maximum price: ", step=1)
 
-    if (price1 and price2):
+    if (st.button("Apply")):
         st.subheader(f"Plans in Range: {price1} and {price2}")
 
         res = requests.get(
@@ -114,7 +120,10 @@ with st.expander("Filter By Price Range ?"):
 
                             for item in j[k]:   # each item is dict
                                 for key, value in item.items():
-                                        lines.append(f"{key}: {value}")
+                                        if key=="price":                            
+                                            lines.append(f"{key}: <strong>{value}</strong>")
+                                        else:
+                                            lines.append(f"{key}: {value}")
 
                             formatted_text = "<br>".join(lines)
 
@@ -128,7 +137,7 @@ with st.expander("Filter By Price Range ?"):
                                         margin-bottom:15px;
                                     ">
                                         <h4 style="
-                                        color: blue;
+                                        color: orange;
                                         ">{i} Pack {number}</h4>
                                         <p style="
                                         color: blue;
@@ -146,7 +155,7 @@ with st.expander("Filter By Validity Range ?"):
         min_validity = st.number_input("Enter minimum validity (days): ", step=1, key="min_val")
         max_validity = st.number_input("Enter maximum validity (days): ", step=1, key="max_val")
 
-    if (min_validity and max_validity):
+    if (st.button("Fetch")):
         st.subheader(f"Plans with Validity Range: {min_validity} to {max_validity} days")
         
         res = requests.get(
@@ -167,7 +176,10 @@ with st.expander("Filter By Validity Range ?"):
                             
                             for item in j[k]:
                                 for key, value in item.items():
-                                    lines.append(f"{key}: {value}")
+                                    if key=="Pack validity":                            
+                                        lines.append(f"{key}: <strong>{value}</strong>")
+                                    else:
+                                        lines.append(f"{key}: {value}")
                             
                             formatted_text = "<br>".join(lines)
                             
@@ -180,7 +192,7 @@ with st.expander("Filter By Validity Range ?"):
                                     border:1px solid #ddd;
                                     margin-bottom:15px;
                                 ">
-                                    <h4 style="color: blue;">{i} Pack {number}</h4>
+                                    <h4 style="color: orange;">{i} Pack {number}</h4>
                                     <p style="color: blue;">{formatted_text}</p>
                                 </div>
                                 """,
@@ -195,7 +207,7 @@ with st.expander("Filter By Data ?"):
         min_data = st.number_input("Enter minimum data (GB): ", step=1.0, key="min_data")
         max_data = st.number_input("Enter maximum data (GB): ", step=1.0, key="max_data")
 
-    if (min_data and max_data):
+    if (st.button("Find")):
         st.subheader(f"Plans with Data Range: {min_data} to {max_data} GB")
         
         res = requests.get(
@@ -216,7 +228,10 @@ with st.expander("Filter By Data ?"):
                             
                             for item in j[k]:
                                 for key, value in item.items():
-                                    lines.append(f"{key}: {value}")
+                                    if key=="Total data":                            
+                                        lines.append(f"{key}: <strong>{value}</strong>")
+                                    else:
+                                        lines.append(f"{key}: {value}")
                             
                             formatted_text = "<br>".join(lines)
                             
@@ -229,7 +244,7 @@ with st.expander("Filter By Data ?"):
                                     border:1px solid #ddd;
                                     margin-bottom:15px;
                                 ">
-                                    <h4 style="color: blue;">{i} Pack {number}</h4>
+                                    <h4 style="color: orange;">{i} Pack {number}</h4>
                                     <p style="color: blue;">{formatted_text}</p>
                                 </div>
                                 """,
@@ -250,7 +265,10 @@ with st.expander("📦 View All Available Plans"):
             
             for benefit_dict in pack[f"benefits pack {i}"]:
                 for key, value in benefit_dict.items():
-                    lines.append(f"{key}: {value}")
+                    if key=="Subscriptions":                            
+                        lines.append(f"{key}: <strong>{value}</strong>")
+                    else:
+                        lines.append(f"{key}: {value}")
             i+=1
             formatted_text = "<br>".join(lines)
 
@@ -264,7 +282,7 @@ with st.expander("📦 View All Available Plans"):
                     margin-bottom:15px;
                 ">
                     <h4 style="
-                                    color: blue;
+                                    color: orange;
                                     ">Pack {index}</h4>
                     <p style="
                     color: blue;
