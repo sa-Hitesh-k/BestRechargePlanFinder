@@ -37,7 +37,7 @@ The system is built on a "Thin-Client" philosophy to ensure high-speed responses
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/sa-Hitesh-k/BestRechargePlanFinder.git](https://github.com/sa-Hitesh-k/BestRechargePlanFinder.git)
+   git clone https://github.com/sa-Hitesh-k/BestRechargePlanFinder.git
    cd BestRechargePlanFinder
 
 2. **Sync the environment:**
