@@ -2,8 +2,8 @@
 
 A specialized data-to-API engine built to solve "Choice Paralysis" in mobile plan selection. This project serves as a proof-of-concept for a decoupled architecture using FastAPI and PostgreSQL.
 
-## 🎯 The "v0" Reality Check
-This is a Minimum Viable Product (MVP). To ensure 99.9% uptime and stateless execution on cloud environments, the following constraints are currently in place:
+## 🎯 The Features
+This Product ensures 99.9% uptime and stateless execution on cloud environments, the following constraints are currently in place:
 * **Provider Scope:** Currently exclusively processing **Jio Plans**.
 * **Filter Depth:** Multi-dimensional querying logic. Filtering engine processes **OTT Subscriptions**, **Price Thresholds**, **Data Quotas**, and **Validity Periods** using set-based SQL operations for sub-second response times.
 * **Architecture:** Deprecated Selenium-based scraping in favor of a stateless, manual data-push architecture to eliminate environment-heavy dependencies.
