@@ -1,4 +1,4 @@
-# 🚀 RechargePlanFinder (v0.1.0-alpha)
+# 🚀 RechargePlanFinder version V1
 
 A specialized data-to-API engine built to solve "Choice Paralysis" in mobile plan selection. This project serves as a proof-of-concept for a decoupled architecture using FastAPI and PostgreSQL.
 
